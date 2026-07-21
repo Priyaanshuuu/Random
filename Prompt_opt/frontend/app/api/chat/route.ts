@@ -14,7 +14,9 @@ export async function POST(req: Request) {
     const response = await chat(message);
 
     return Response.json(response);
-  } catch {
+  } catch (error){
+    console.log("Chat API Error" , error);
+    
     return Response.json(
       { error: "Internal Server Error" },
       { status: 500 }
