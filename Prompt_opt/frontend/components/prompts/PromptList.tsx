@@ -101,11 +101,9 @@ export function PromptList() {
       )}
 
       {/* Dialogs */}
-      <PromptForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onCreate={create}
-      />
+      {formOpen && (
+        <PromptForm onClose={() => setFormOpen(false)} onCreate={create} />
+      )}
       <DeletePromptDialog
         prompt={promptToDelete}
         onClose={() => setPromptToDelete(null)}

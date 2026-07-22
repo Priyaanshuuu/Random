@@ -53,7 +53,7 @@ export function PromptCard({
       </div>
 
       {/* Prompt preview */}
-      <p className="text-sm text-foreground/80 leading-relaxed line-clamp-3 flex-1 min-h-[4.5rem]">
+      <p className="text-sm text-foreground/80 leading-relaxed line-clamp-3 flex-1 min-h-18">
         {prompt.prompt}
       </p>
 

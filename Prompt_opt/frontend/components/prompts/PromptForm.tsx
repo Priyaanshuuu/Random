@@ -1,30 +1,18 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { X, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface PromptFormProps {
-  open: boolean;
   onClose: () => void;
   onCreate: (prompt: string) => Promise<void>;
 }
 
-export function PromptForm({ open, onClose, onCreate }: PromptFormProps) {
+export function PromptForm({ onClose, onCreate }: PromptFormProps) {
   const [value, setValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      setValue("");
-      setError(null);
-      setTimeout(() => textareaRef.current?.focus(), 50);
-    }
-  }, [open]);
-
-  if (!open) return null;
 
   const handleSubmit = async () => {
     const trimmed = value.trim();
@@ -82,7 +70,7 @@ export function PromptForm({ open, onClose, onCreate }: PromptFormProps) {
             System Prompt
           </label>
           <textarea
-            ref={textareaRef}
+            autoFocus
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
