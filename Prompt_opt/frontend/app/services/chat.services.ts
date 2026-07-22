@@ -11,7 +11,7 @@ export async function chat(message: string) {
 
   // Ask OpenAI
   const completion = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
+    model: "llama-3.3-70b-versatile",
     messages: [
       {
         role: "system",
