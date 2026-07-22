@@ -1,4 +1,4 @@
-import { chat } from "../../services/chat.services";
+import { chat } from "../../services/chat.service";
 
 export async function POST(req: Request) {
   try {
