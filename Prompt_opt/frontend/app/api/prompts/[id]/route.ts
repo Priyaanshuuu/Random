@@ -6,18 +6,20 @@ import {
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const prompt = await activatePrompt(params.id);
+  const { id } = await params;
+  const prompt = await activatePrompt(id);
 
   return NextResponse.json(prompt);
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  await deletePrompt(params.id);
+  const { id } = await params;
+  await deletePrompt(id);
 
   return NextResponse.json({
     success: true,
