@@ -8,16 +8,14 @@ datasource db {
 }
 
 model PromptVersion {
-  id           String   @id @default(cuid())
-  version      Int      @unique
-  prompt       String   @db.Text
-  description  String?
-  isActive     Boolean  @default(false)
-  createdAt    DateTime @default(now())
+  id        String   @id @default(cuid())
+  version   Int      @unique
+  prompt    String
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   conversations Conversation[]
 }
-
 model Conversation {
   id              String   @id @default(cuid())
   title           String?
@@ -38,3 +36,4 @@ model Message {
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
+
