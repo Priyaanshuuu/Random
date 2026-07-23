@@ -16,15 +16,17 @@ model PromptVersion {
 
   conversations Conversation[]
 }
+
 model Conversation {
-  id              String   @id @default(cuid())
-  title           String?
-  createdAt       DateTime @default(now())
+  id         String      @id @default(cuid())
+  title      String?
+  createdAt  DateTime    @default(now())
 
   promptVersionId String
   promptVersion   PromptVersion @relation(fields: [promptVersionId], references: [id])
 
-  messages Message[]
+  messages    Message[]
+  evaluation  Evaluation?
 }
 
 model Message {
@@ -37,3 +39,12 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
 
+model Evaluation {
+  id             String   @id @default(cuid())
+  conversationId String   @unique
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  score          Int
+  feedback       String
+  createdAt      DateTime @default(now())
+}
