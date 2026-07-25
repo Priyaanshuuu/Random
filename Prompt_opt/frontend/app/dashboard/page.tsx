@@ -1,7 +1,16 @@
 import Link from "next/link";
 import { FileText, MessageSquare } from "lucide-react";
+import EvaluationCard from "@/components/Evaluate/EvaluateCard";
+import { prisma } from "@/lib/prisma";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const evaluations = await prisma.evaluation.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 10,
+  });
+
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <div>
@@ -48,6 +57,34 @@ export default function DashboardPage() {
           </div>
         </Link>
       </div>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">
+            Recent Evaluations
+          </h2>
+          <p className="text-xs text-muted mt-0.5">
+            Latest feedback generated from your conversations
+          </p>
+        </div>
+
+        {evaluations.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted">
+            No evaluations yet. Run a conversation through the evaluator to see
+            results here.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {evaluations.map((evaluation) => (
+              <EvaluationCard
+                key={evaluation.id}
+                score={evaluation.score}
+                feedback={evaluation.feedback}
+              />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
