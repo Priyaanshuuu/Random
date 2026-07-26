@@ -7,7 +7,7 @@ import { PromptForm } from "./PromptForm";
 import { DeletePromptDialog } from "./DeletePromptDialog";
 import { EmptyState } from "./EmptyState";
 import { Button } from "@/components/ui/button";
-import { PromptVersion } from "@/lib/api";
+import { PromptVersion, optimizePromptById } from "@/lib/api";
 
 function SkeletonCard() {
   return (
@@ -30,9 +30,11 @@ function SkeletonCard() {
 }
 
 export function PromptList() {
-  const { prompts, loading, error, create, activate, remove } = usePrompts();
+  const { prompts, loading, error, create, activate, remove, refresh } =
+    usePrompts();
   const [formOpen, setFormOpen] = useState(false);
   const [activatingId, setActivatingId] = useState<string | null>(null);
+  const [optimizingId, setOptimizingId] = useState<string | null>(null);
   const [promptToDelete, setPromptToDelete] = useState<PromptVersion | null>(
     null,
   );
@@ -48,6 +50,16 @@ export function PromptList() {
 
   const handleDelete = async (id: string) => {
     await remove(id);
+  };
+
+  const handleOptimize = async (id: string) => {
+    setOptimizingId(id);
+    try {
+      await optimizePromptById(id);
+      await refresh();
+    } finally {
+      setOptimizingId(null);
+    }
   };
 
   return (
@@ -93,8 +105,10 @@ export function PromptList() {
               key={prompt.id}
               prompt={prompt}
               onActivate={handleActivate}
+              onOptimize={handleOptimize}
               onDelete={setPromptToDelete}
               isActivating={activatingId === prompt.id}
+              isOptimizing={optimizingId === prompt.id}
             />
           ))}
         </div>

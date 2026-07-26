@@ -32,3 +32,15 @@ export async function deletePromptById(id: string): Promise<void> {
   const res = await fetch(`/api/prompts/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete prompt");
 }
+
+export async function optimizePromptById(id: string): Promise<PromptVersion> {
+  const res = await fetch("/api/optimize", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ promptId: id }),
+  });
+
+  if (!res.ok) throw new Error("Failed to optimize prompt");
+
+  return res.json();
+}

@@ -1,5 +1,5 @@
 "use client";
-import { CheckCircle, Trash2, Calendar } from "lucide-react";
+import { CheckCircle, Trash2, Calendar, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -8,15 +8,19 @@ import { PromptVersion } from "@/lib/api";
 interface PromptCardProps {
   prompt: PromptVersion;
   onActivate: (id: string) => void;
+  onOptimize: (id: string) => void;
   onDelete: (prompt: PromptVersion) => void;
   isActivating: boolean;
+  isOptimizing: boolean;
 }
 
 export function PromptCard({
   prompt,
   onActivate,
+  onOptimize,
   onDelete,
   isActivating,
+  isOptimizing,
 }: PromptCardProps) {
   const date = new Date(prompt.createdAt).toLocaleDateString("en-US", {
     month: "short",
@@ -59,6 +63,16 @@ export function PromptCard({
 
       {/* Actions */}
       <div className="flex items-center gap-2 pt-2 border-t border-border/60">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onOptimize(prompt.id)}
+          disabled={isOptimizing}
+          className="flex-1"
+        >
+          <Sparkles size={13} />
+          {isOptimizing ? "Optimizing…" : "Optimize"}
+        </Button>
         {!prompt.isActive && (
           <Button
             variant="secondary"
