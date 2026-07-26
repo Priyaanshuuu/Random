@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ChatMessage as ChatMessageType } from "@/lib/dummy-data";
 import { ChatMessage, TypingIndicator } from "./ChatMessage";
 import { ChatInput, type ChatInputHandle } from "./ChatInput";
-import { EmptyState } from "@/components/shared/EmptyState";
+import { ChatEmptyState } from "./ChatEmptyState";
 
 interface ChatContainerProps {
   messages: ChatMessageType[];
@@ -82,7 +82,7 @@ export function ChatContainer({
     <div className="flex min-h-0 flex-1 flex-col">
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {isEmpty ? (
-          <EmptyState onPick={(p) => inputRef.current?.setValue(p)} />
+          <ChatEmptyState onPick={(p) => inputRef.current?.setValue(p)} />
         ) : (
           <div className="pb-6">
             {messages.map((m) => (

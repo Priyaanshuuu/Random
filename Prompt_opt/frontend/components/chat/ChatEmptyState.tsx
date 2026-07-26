@@ -1,12 +1,12 @@
 import { Sparkles } from "lucide-react";
 import { SUGGESTED_PROMPTS } from "@/lib/dummy-data";
 
-interface EmptyStateProps {
+interface ChatEmptyStateProps {
   onPick?: (prompt: string) => void;
 }
 
 /** Shown in the chat area when there are no messages yet. */
-export function EmptyState({ onPick }: EmptyStateProps) {
+export function ChatEmptyState({ onPick }: ChatEmptyStateProps) {
   return (
     <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center px-6 py-16 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/30">

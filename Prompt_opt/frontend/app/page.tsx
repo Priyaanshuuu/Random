@@ -1,7 +1,7 @@
-import { Hero } from "@/components/Landing/Hero";
-import { Features } from "@/components/Landing/Features";
-import { Architecture } from "@/components/Landing/Architecture";
-import { Footer } from "@/components/Landing/Footer";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { Architecture } from "@/components/landing/Architecture";
+import { Footer } from "@/components/landing/Footer";
 
 export default function Home() {
   return (

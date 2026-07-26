@@ -11,7 +11,6 @@ async function main() {
       version: 1,
       prompt:
         "You are an expert AI assistant. Explain concepts clearly with examples.",
-      description: "Initial Prompt",
       isActive: true,
     },
   });

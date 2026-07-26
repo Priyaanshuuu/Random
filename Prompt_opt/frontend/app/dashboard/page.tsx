@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FileText, MessageSquare } from "lucide-react";
-import EvaluationCard from "@/components/Evaluate/EvaluateCard";
+import EvaluationCard from "@/components/evaluate/EvaluateCard";
 import { prisma } from "@/lib/prisma";
 
 export default async function DashboardPage() {
