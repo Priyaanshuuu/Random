@@ -1,45 +1,66 @@
 "use client";
 
-import { GitBranch, Cpu, PanelLeft, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { Cpu, LayoutDashboard, PanelLeft } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
-import { ACTIVE_MODEL, ACTIVE_PROMPT_VERSION } from "@/lib/dummy-data";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { ACTIVE_MODEL, PROVIDER_NAME } from "@/lib/constants";
 
 interface NavbarProps {
-  title?: string;
-  onToggleSidebar?: () => void;
+  title: string;
+  onToggleSidebar: () => void;
 }
 
-export function Navbar({ title = "New chat", onToggleSidebar }: NavbarProps) {
+export function Navbar({ title, onToggleSidebar }: NavbarProps) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-background/80 px-3 backdrop-blur sm:px-4">
       <div className="flex min-w-0 items-center gap-2">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onToggleSidebar}
           aria-label="Toggle sidebar"
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-foreground md:hidden"
+          className="md:hidden"
         >
-          <PanelLeft className="h-4.5 w-4.5" />
-        </button>
+          <PanelLeft />
+        </Button>
         <h1 className="truncate text-sm font-medium text-foreground/90">
           {title}
         </h1>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Badge variant="accent" className="hidden sm:inline-flex">
-          <GitBranch className="h-3.5 w-3.5" />
-          Prompt {ACTIVE_PROMPT_VERSION}
-        </Badge>
+      <div className="flex items-center gap-1.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="primary" className="hidden sm:inline-flex">
+              <Cpu />
+              {ACTIVE_MODEL.label}
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            Served by {PROVIDER_NAME} · {ACTIVE_MODEL.id}
+          </TooltipContent>
+        </Tooltip>
 
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-2 px-2.5 py-1 text-xs font-medium text-foreground/90 transition-colors hover:border-primary/40"
-        >
-          <Cpu className="h-3.5 w-3.5 text-primary" />
-          {ACTIVE_MODEL.label}
-          <ChevronDown className="h-3.5 w-3.5 text-muted" />
-        </button>
+        <ThemeToggle />
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/dashboard" aria-label="Open dashboard">
+                <LayoutDashboard />
+              </Link>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Dashboard</TooltipContent>
+        </Tooltip>
       </div>
     </header>
   );

@@ -13,7 +13,7 @@ export function Loading({ className, size = 18, label }: LoadingProps) {
     <div
       role="status"
       aria-live="polite"
-      className={cn("flex items-center gap-2 text-muted", className)}
+      className={cn("flex items-center gap-2 text-muted-foreground", className)}
     >
       <Loader2 className="animate-spin" style={{ width: size, height: size }} />
       {label ? <span className="text-sm">{label}</span> : null}

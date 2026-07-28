@@ -1,46 +1,79 @@
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "secondary" | "ghost" | "outline";
-type Size = "sm" | "md" | "lg" | "icon";
-
-const variants: Record<Variant, string> = {
-  primary:
-    "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,0_8px_24px_-8px_rgba(124,92,255,0.6)]",
-  secondary:
-    "bg-surface-2 text-foreground hover:bg-surface-2/70 border border-border",
-  ghost: "text-foreground/80 hover:bg-surface-2 hover:text-foreground",
-  outline:
-    "border border-border bg-transparent text-foreground hover:bg-surface-2",
-};
-
-const sizes: Record<Size, string> = {
-  sm: "h-8 px-3 text-sm gap-1.5",
-  md: "h-10 px-4 text-sm gap-2",
-  lg: "h-12 px-6 text-base gap-2",
-  icon: "h-9 w-9",
-};
-
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
-}
-
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", ...props }, ref) => {
-    return (
-      <button
-        ref={ref}
-        className={cn(
-          "inline-flex items-center justify-center rounded-xl font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/70 disabled:pointer-events-none disabled:opacity-50",
-          variants[variant],
-          sizes[size],
-          className,
-        )}
-        {...props}
-      />
-    );
+const buttonVariants = cva(
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default:
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-[0.98]",
+        secondary:
+          "border border-border bg-surface-2 text-foreground hover:bg-surface-2/70 active:scale-[0.98]",
+        outline:
+          "border border-border bg-transparent text-foreground hover:bg-surface-2 active:scale-[0.98]",
+        ghost: "text-foreground/80 hover:bg-surface-2 hover:text-foreground",
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 active:scale-[0.98]",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        sm: "h-8 gap-1.5 px-3 text-xs",
+        md: "h-9 px-4",
+        lg: "h-11 px-6 text-base",
+        icon: "size-9",
+        "icon-sm": "size-8",
+      },
+    },
+    defaultVariants: { variant: "default", size: "md" },
   },
 );
-Button.displayName = "Button";
+
+export interface ButtonProps
+  extends React.ComponentProps<"button">,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+  /** Swaps in a leading spinner and disables the button. */
+  loading?: boolean;
+}
+
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  loading = false,
+  disabled,
+  children,
+  ...props
+}: ButtonProps) {
+  if (asChild) {
+    return (
+      <Slot
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      >
+        {children}
+      </Slot>
+    );
+  }
+
+  return (
+    <button
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {loading ? <Loader2 className="animate-spin" /> : null}
+      {children}
+    </button>
+  );
+}
+
+export { Button, buttonVariants };

@@ -28,11 +28,11 @@ function CodeBlock({
   return (
     <div className="my-4 overflow-hidden rounded-xl border border-border bg-[#0c0c0f]">
       <div className="flex items-center justify-between border-b border-border bg-surface-2/60 px-4 py-2">
-        <span className="font-mono text-xs text-muted">{language ?? "code"}</span>
+        <span className="font-mono text-xs text-muted-foreground">{language ?? "code"}</span>
         <button
           type="button"
           onClick={copy}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted transition-colors hover:bg-surface hover:text-foreground"
+          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
         >
           {copied ? (
             <>
@@ -78,7 +78,7 @@ export function Markdown({ content }: { content: string }) {
             <ol className={cn("my-3 list-decimal space-y-1.5 pl-5", className)} {...p} />
           ),
           li: ({ className, ...p }) => (
-            <li className={cn("marker:text-muted", className)} {...p} />
+            <li className={cn("marker:text-muted-foreground", className)} {...p} />
           ),
           a: ({ className, ...p }) => (
             <a
@@ -91,7 +91,7 @@ export function Markdown({ content }: { content: string }) {
           blockquote: ({ className, ...p }) => (
             <blockquote
               className={cn(
-                "my-4 border-l-2 border-primary/50 bg-surface-2/40 px-4 py-2 text-muted italic",
+                "my-4 border-l-2 border-primary/50 bg-surface-2/40 px-4 py-2 text-muted-foreground italic",
                 className,
               )}
               {...p}

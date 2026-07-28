@@ -1,128 +1,166 @@
 "use client";
-import { useState } from "react";
-import { Plus } from "lucide-react";
-import { usePrompts } from "@/hooks/usePrompts";
-import { PromptCard } from "./PromptCard";
-import { PromptForm } from "./PromptForm";
-import { DeletePromptDialog } from "./DeletePromptDialog";
-import { EmptyState } from "./EmptyState";
-import { Button } from "@/components/ui/button";
-import { PromptVersion, optimizePromptById } from "@/lib/api";
 
-function SkeletonCard() {
-  return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 animate-pulse">
-      <div className="flex items-center justify-between">
-        <div className="h-5 w-14 rounded-md bg-surface-2" />
-        <div className="h-4 w-24 rounded-md bg-surface-2" />
-      </div>
-      <div className="space-y-2 flex-1">
-        <div className="h-3.5 w-full rounded-md bg-surface-2" />
-        <div className="h-3.5 w-5/6 rounded-md bg-surface-2" />
-        <div className="h-3.5 w-4/6 rounded-md bg-surface-2" />
-      </div>
-      <div className="flex gap-2 pt-2 border-t border-border/60">
-        <div className="h-8 flex-1 rounded-xl bg-surface-2" />
-        <div className="h-8 w-9 rounded-xl bg-surface-2" />
-      </div>
-    </div>
-  );
-}
+import { useMemo, useState } from "react";
+import { FileText, Search, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+
+import { usePrompts } from "@/hooks/usePrompts";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { ErrorState } from "@/components/shared/ErrorState";
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { PromptCard } from "./PromptCard";
+import { PromptToolbar } from "./PromptToolbar";
+import { PromptFormDialog } from "./PromptFormDialog";
+import { PromptGridSkeleton } from "./PromptCardSkeleton";
+import type { PromptVersion } from "@/lib/types";
 
 export function PromptList() {
-  const { prompts, loading, error, create, activate, remove, refresh } =
-    usePrompts();
-  const [formOpen, setFormOpen] = useState(false);
-  const [activatingId, setActivatingId] = useState<string | null>(null);
-  const [optimizingId, setOptimizingId] = useState<string | null>(null);
+  const {
+    prompts,
+    isLoading,
+    error,
+    create,
+    activate,
+    remove,
+    optimize,
+    refresh,
+  } = usePrompts();
+
+  const [query, setQuery] = useState("");
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [promptToDelete, setPromptToDelete] = useState<PromptVersion | null>(
     null,
   );
+  const [optimizingId, setOptimizingId] = useState<string | null>(null);
+  const [newVersionId, setNewVersionId] = useState<string | null>(null);
 
-  const handleActivate = async (id: string) => {
-    setActivatingId(id);
-    try {
-      await activate(id);
-    } finally {
-      setActivatingId(null);
-    }
-  };
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return prompts;
+    return prompts.filter(
+      (p) =>
+        p.prompt.toLowerCase().includes(needle) ||
+        `v${p.version}`.includes(needle),
+    );
+  }, [prompts, query]);
 
-  const handleDelete = async (id: string) => {
-    await remove(id);
-  };
+  const handleOptimize = async (prompt: PromptVersion) => {
+    setOptimizingId(prompt.id);
+    const created = await optimize(prompt.id);
+    setOptimizingId(null);
 
-  const handleOptimize = async (id: string) => {
-    setOptimizingId(id);
-    try {
-      await optimizePromptById(id);
-      await refresh();
-    } finally {
-      setOptimizingId(null);
+    if (created) {
+      setNewVersionId(created.id);
+      setQuery("");
+      toast.success(`Version ${created.version} generated`, {
+        description: `Optimized from v${prompt.version}. Activate it to start using it.`,
+        action: {
+          label: "Activate",
+          onClick: () => void activate(created.id),
+        },
+      });
     }
   };
 
   return (
-    <>
-      {/* Toolbar */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">
-            Prompt Versions
-          </h2>
-          <p className="text-xs text-muted mt-0.5">
-            {loading
-              ? "Loading…"
-              : `${prompts.length} version${prompts.length !== 1 ? "s" : ""}`}
-          </p>
-        </div>
-        <Button variant="primary" size="sm" onClick={() => setFormOpen(true)}>
-          <Plus size={14} />
-          New Prompt
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Prompt versions"
+        description="Author, evaluate, and promote the system prompt that powers your chat."
+      />
 
-      {/* Error banner */}
-      {error && (
-        <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-400">
-          {error}
+      <PromptToolbar
+        query={query}
+        onQueryChange={setQuery}
+        onCreate={() => setIsFormOpen(true)}
+        resultCount={filtered.length}
+        totalCount={prompts.length}
+        isLoading={isLoading}
+      />
+
+      {optimizingId && (
+        <div
+          className="space-y-2 rounded-xl border border-primary/30 bg-primary/5 p-4"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <Sparkles className="size-4 animate-pulse text-primary" />
+            Optimizing prompt…
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Rewriting based on recent evaluation feedback. This creates a new
+            inactive version.
+          </p>
+          {/* Duration is unknown, so this reads as activity rather than progress. */}
+          <Progress value={65} className="h-1.5 animate-pulse" />
         </div>
       )}
 
-      {/* Content */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
+      {error ? (
+        <ErrorState message={error} onRetry={refresh} />
+      ) : isLoading ? (
+        <PromptGridSkeleton />
       ) : prompts.length === 0 ? (
-        <EmptyState onCreate={() => setFormOpen(true)} />
+        <EmptyState
+          icon={FileText}
+          title="No prompt versions yet"
+          description="Create your first version to start testing and optimizing how the assistant behaves."
+          action={<Button onClick={() => setIsFormOpen(true)}>New prompt</Button>}
+        />
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={Search}
+          title="No matching versions"
+          description={`Nothing matches “${query}”. Try a different search term.`}
+          action={
+            <Button variant="outline" onClick={() => setQuery("")}>
+              Clear search
+            </Button>
+          }
+        />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {prompts.map((prompt) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((prompt) => (
             <PromptCard
               key={prompt.id}
               prompt={prompt}
-              onActivate={handleActivate}
+              onActivate={(p) => void activate(p.id)}
               onOptimize={handleOptimize}
               onDelete={setPromptToDelete}
-              isActivating={activatingId === prompt.id}
               isOptimizing={optimizingId === prompt.id}
+              isJustCreated={newVersionId === prompt.id}
             />
           ))}
         </div>
       )}
 
-      {/* Dialogs */}
-      {formOpen && (
-        <PromptForm onClose={() => setFormOpen(false)} onCreate={create} />
-      )}
-      <DeletePromptDialog
-        prompt={promptToDelete}
-        onClose={() => setPromptToDelete(null)}
-        onConfirm={handleDelete}
+      <PromptFormDialog
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        onCreate={create}
       />
-    </>
+
+      <ConfirmDialog
+        open={Boolean(promptToDelete)}
+        onOpenChange={(open) => !open && setPromptToDelete(null)}
+        title="Delete this version?"
+        description={
+          <>
+            Version{" "}
+            <span className="font-medium text-foreground">
+              v{promptToDelete?.version}
+            </span>{" "}
+            will be permanently removed. This cannot be undone.
+          </>
+        }
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => promptToDelete && remove(promptToDelete.id)}
+      />
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { openai } from "@/lib/openai";
+import { groq } from "@/lib/groq";
 
 export async function chat(message: string) {
   // Get active prompt
@@ -9,8 +9,8 @@ export async function chat(message: string) {
 
   if (!prompt) throw new Error("No active prompt");
 
-  // Ask OpenAI
-  const completion = await openai.chat.completions.create({
+  // Ask Groq
+  const completion = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",
     messages: [
       {

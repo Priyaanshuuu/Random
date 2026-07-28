@@ -1,95 +1,104 @@
 "use client";
-import { useState } from "react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  Zap,
-} from "lucide-react";
+import { FileText, LayoutDashboard, MessageSquare, X, Zap } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { APP_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    exact: true,
-  },
-  {
-    href: "/dashboard/prompts",
-    label: "Prompts",
-    icon: FileText,
-    exact: false,
-  },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  exact: boolean;
+  external?: boolean;
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/prompts", label: "Prompts", icon: FileText, exact: false },
+  { href: "/chat", label: "Chat", icon: MessageSquare, exact: true, external: true },
 ];
 
-export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+interface SidebarProps {
+  /** Mobile drawer open state. */
+  open: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside
-      className={cn(
-        "relative flex flex-col h-full bg-surface border-r border-border transition-all duration-300 shrink-0",
-        collapsed ? "w-[60px]" : "w-[220px]",
+    <>
+      {open && (
+        <div
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={onClose}
+          aria-hidden
+        />
       )}
-    >
-      {/* Logo */}
-      <div
+
+      <aside
         className={cn(
-          "flex items-center gap-2.5 h-14 px-4 border-b border-border shrink-0",
-          collapsed && "justify-center px-0",
+          "fixed inset-y-0 left-0 z-40 flex w-60 shrink-0 flex-col border-r border-border bg-surface transition-transform duration-200 md:static md:z-auto md:translate-x-0",
+          open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-lg bg-primary/15 text-primary">
-          <Zap size={15} />
+        <div className="flex h-14 shrink-0 items-center justify-between gap-2.5 border-b border-border px-4">
+          <Link href="/" className="flex items-center gap-2.5">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+              <Zap className="size-4" />
+            </span>
+            <span className="text-sm font-semibold tracking-tight">
+              {APP_NAME}
+            </span>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            aria-label="Close navigation"
+            className="md:hidden"
+          >
+            <X />
+          </Button>
         </div>
-        {!collapsed && (
-          <span className="font-semibold text-sm text-foreground tracking-tight">
-            Promptly
-          </span>
-        )}
-      </div>
 
-      {/* Nav */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-hidden">
-        {navItems.map(({ href, label, icon: Icon, exact }) => {
-          const isActive = exact
-            ? pathname === href
-            : pathname.startsWith(href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              title={collapsed ? label : undefined}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted hover:bg-surface-2 hover:text-foreground",
-                collapsed && "justify-center px-0",
-              )}
-            >
-              <Icon size={15} className="shrink-0" />
-              {!collapsed && <span>{label}</span>}
-            </Link>
-          );
-        })}
-      </nav>
+        <nav className="flex-1 space-y-0.5 px-2 py-3">
+          {NAV_ITEMS.map(({ href, label, icon: Icon, exact, external }) => {
+            const isActive = exact
+              ? pathname === href
+              : pathname.startsWith(href);
 
-      {/* Collapse toggle */}
-      <div className="p-2 border-t border-border shrink-0">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-center w-full h-8 rounded-lg text-muted hover:bg-surface-2 hover:text-foreground transition-colors"
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
-      </div>
-    </aside>
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-surface-2 hover:text-foreground",
+                )}
+              >
+                <Icon className="size-4 shrink-0" />
+                <span>{label}</span>
+                {external && (
+                  <span className="ml-auto text-[10px] text-muted-foreground/60">
+                    ↗
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
   );
 }

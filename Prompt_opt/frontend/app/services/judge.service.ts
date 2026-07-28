@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { openai } from "@/lib/openai";
+import { groq } from "@/lib/groq";
 
 export async function evaluateConversation(conversationId: string) {
   const conversation = await prisma.conversation.findUnique({
@@ -22,7 +22,7 @@ export async function evaluateConversation(conversationId: string) {
     (m) => m.role === "assistant"
   );
 
-  const completion = await openai.chat.completions.create({
+  const completion = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",
     messages: [
       {

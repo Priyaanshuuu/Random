@@ -62,7 +62,7 @@ export function Features() {
           <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
             Everything you need to ship better prompts
           </h2>
-          <p className="mt-4 text-pretty text-muted">
+          <p className="mt-4 text-pretty text-muted-foreground">
             A focused toolkit for prompt engineers who treat prompts as
             first-class artifacts.
           </p>
@@ -78,7 +78,7 @@ export function Features() {
                 <Icon className="h-5 w-5" />
               </div>
               <h3 className="text-base font-semibold">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted">{description}</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
             </div>
           ))}
         </div>

@@ -1,103 +1,101 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { ChatMessage as ChatMessageType } from "@/lib/dummy-data";
+import { useEffect, useRef } from "react";
+import { Gauge } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { useEvaluation } from "@/hooks/useEvaluation";
+import { EvaluationCard } from "@/components/evaluate/EvaluationCard";
+import type { ChatMessage as ChatMessageType } from "@/lib/types";
 import { ChatMessage, TypingIndicator } from "./ChatMessage";
 import { ChatInput, type ChatInputHandle } from "./ChatInput";
 import { ChatEmptyState } from "./ChatEmptyState";
 
 interface ChatContainerProps {
   messages: ChatMessageType[];
-  onMessagesChange: (messages: ChatMessageType[]) => void;
+  isSending: boolean;
+  onSend: (message: string) => void;
+  onStop: () => void;
+  onRetry: (messageId: string) => void;
 }
-
-// Canned reply — no backend, no API. Purely to demonstrate the UI states.
-const DEMO_REPLY = `Great — here's a refined version of that prompt:
-
-\`\`\`text
-You are a senior prompt engineer. Rewrite the user's instruction into a
-clear, structured prompt with: (1) a role, (2) explicit constraints, and
-(3) a defined output format. Keep it concise.
-\`\`\`
-
-I focused on **clarity** and **determinism**. Want me to generate an A/B variant?`;
-
-let idCounter = 0;
-const nextId = () => `local-${Date.now()}-${idCounter++}`;
 
 export function ChatContainer({
   messages,
-  onMessagesChange,
+  isSending,
+  onSend,
+  onStop,
+  onRetry,
 }: ChatContainerProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<ChatInputHandle>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { results, pendingId, evaluate } = useEvaluation();
 
-  const isEmpty = messages.length === 0;
-
-  // Autoscroll to the newest message / typing indicator.
+  // Follow the newest message / typing indicator.
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [messages, isLoading]);
-
-  // Clean up a pending simulated reply if unmounted.
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
-
-  const handleSend = (content: string) => {
-    const userMessage: ChatMessageType = {
-      id: nextId(),
-      role: "user",
-      content,
-    };
-    const withUser = [...messages, userMessage];
-    onMessagesChange(withUser);
-    setIsLoading(true);
-
-    // Simulate an assistant response (UI demo only).
-    timerRef.current = setTimeout(() => {
-      const assistantMessage: ChatMessageType = {
-        id: nextId(),
-        role: "assistant",
-        content: DEMO_REPLY,
-      };
-      onMessagesChange([...withUser, assistantMessage]);
-      setIsLoading(false);
-    }, 1400);
-  };
-
-  const handleStop = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setIsLoading(false);
-  };
+  }, [messages, isSending]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        {isEmpty ? (
+        {messages.length === 0 ? (
           <ChatEmptyState onPick={(p) => inputRef.current?.setValue(p)} />
         ) : (
           <div className="pb-6">
-            {messages.map((m) => (
-              <ChatMessage key={m.id} message={m} />
-            ))}
-            {isLoading && <TypingIndicator />}
+            {messages.map((message) => {
+              const conversationId = message.conversationId;
+              const evaluation = conversationId
+                ? results[conversationId]
+                : undefined;
+
+              return (
+                <div key={message.id}>
+                  <ChatMessage
+                    message={message}
+                    onRetry={onRetry}
+                    actions={
+                      conversationId && !evaluation ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-foreground"
+                          loading={pendingId === conversationId}
+                          onClick={() => void evaluate(conversationId)}
+                        >
+                          {pendingId === conversationId ? null : <Gauge />}
+                          Evaluate
+                        </Button>
+                      ) : null
+                    }
+                  />
+
+                  {evaluation && (
+                    <div className="mx-auto max-w-3xl px-4 pb-2 pl-16">
+                      <EvaluationCard
+                        score={evaluation.score}
+                        feedback={evaluation.feedback}
+                        createdAt={evaluation.createdAt}
+                        className="animate-fade-up"
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {isSending && <TypingIndicator />}
           </div>
         )}
       </div>
 
       <ChatInput
         ref={inputRef}
-        onSend={handleSend}
-        isLoading={isLoading}
-        onStop={handleStop}
+        onSend={onSend}
+        isLoading={isSending}
+        onStop={onStop}
       />
     </div>
   );

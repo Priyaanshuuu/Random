@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { openai } from "@/lib/openai";
+import { groq } from "@/lib/groq";
 
 export async function optimizePrompt(promptId: string) {
   const prompt = await prisma.promptVersion.findUnique({
@@ -23,7 +23,7 @@ export async function optimizePrompt(promptId: string) {
     .map((e) => `Score: ${e.score}\nFeedback: ${e.feedback}`)
     .join("\n\n");
 
-  const completion = await openai.chat.completions.create({
+  const completion = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",
     messages: [
       {

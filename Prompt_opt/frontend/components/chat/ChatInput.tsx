@@ -10,7 +10,12 @@ import {
   type KeyboardEvent,
 } from "react";
 import { ArrowUp, Square } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { APP_NAME, PROVIDER_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+
+const MAX_HEIGHT = 200;
 
 export interface ChatInputHandle {
   setValue: (value: string) => void;
@@ -19,26 +24,26 @@ export interface ChatInputHandle {
 
 interface ChatInputProps {
   onSend: (message: string) => void;
-  isLoading?: boolean;
-  onStop?: () => void;
+  isLoading: boolean;
+  onStop: () => void;
 }
 
 export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
-  function ChatInput({ onSend, isLoading = false, onStop }, ref) {
+  function ChatInput({ onSend, isLoading, onStop }, ref) {
     const [value, setValue] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // Auto-grow the textarea up to a max height.
+    // Auto-grow the textarea up to a fixed ceiling.
     useLayoutEffect(() => {
       const el = textareaRef.current;
       if (!el) return;
       el.style.height = "auto";
-      el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+      el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`;
     }, [value]);
 
     useImperativeHandle(ref, () => ({
-      setValue: (v: string) => {
-        setValue(v);
+      setValue: (next: string) => {
+        setValue(next);
         textareaRef.current?.focus();
       },
       focus: () => textareaRef.current?.focus(),
@@ -70,7 +75,8 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
         <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
           <div
             className={cn(
-              "flex items-end gap-2 rounded-2xl border border-border bg-surface p-2 pl-4 transition-colors focus-within:border-primary/50",
+              "flex items-end gap-2 rounded-2xl border border-border bg-surface p-2 pl-4 shadow-sm transition-colors",
+              "focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring/20",
             )}
           >
             <textarea
@@ -79,38 +85,45 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               value={value}
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message Promptly…"
-              className="max-h-[200px] flex-1 resize-none bg-transparent py-2 text-[15px] leading-6 text-foreground outline-none placeholder:text-muted/70"
+              placeholder={`Message ${APP_NAME}…`}
+              aria-label="Message"
+              className="max-h-[200px] flex-1 resize-none bg-transparent py-2 text-[15px] leading-6 text-foreground outline-none placeholder:text-muted-foreground/70"
             />
 
             {isLoading ? (
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                size="icon"
                 onClick={onStop}
                 aria-label="Stop generating"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-2 text-foreground transition-colors hover:bg-surface-2/70"
+                className="rounded-xl"
               >
-                <Square className="h-4 w-4 fill-current" />
-              </button>
+                <Square className="fill-current" />
+              </Button>
             ) : (
-              <button
+              <Button
                 type="submit"
+                size="icon"
                 disabled={!canSend}
                 aria-label="Send message"
-                className={cn(
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors",
-                  canSend
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "cursor-not-allowed bg-surface-2 text-muted",
-                )}
+                className="rounded-xl"
               >
-                <ArrowUp className="h-4 w-4" />
-              </button>
+                <ArrowUp />
+              </Button>
             )}
           </div>
 
-          <p className="mt-2 text-center text-xs text-muted/60">
-            Promptly can make mistakes. Demo UI with sample data.
+          <p className="mt-2 text-center text-xs text-muted-foreground/70">
+            Responses run against your active prompt via {PROVIDER_NAME}. Press{" "}
+            <kbd className="rounded border border-border bg-surface-2 px-1 font-mono">
+              Shift
+            </kbd>
+            {" + "}
+            <kbd className="rounded border border-border bg-surface-2 px-1 font-mono">
+              Enter
+            </kbd>{" "}
+            for a new line.
           </p>
         </form>
       </div>

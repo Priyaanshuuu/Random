@@ -45,7 +45,7 @@ export function Architecture() {
           <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
             A simple, repeatable pipeline
           </h2>
-          <p className="mt-4 text-pretty text-muted">
+          <p className="mt-4 text-pretty text-muted-foreground">
             From messy idea to production-ready prompt in four steps.
           </p>
         </div>
@@ -58,14 +58,14 @@ export function Architecture() {
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/30">
                     <Icon className="h-5 w-5" />
                   </span>
-                  <span className="font-mono text-sm text-muted/60">{step}</span>
+                  <span className="font-mono text-sm text-muted-foreground/60">{step}</span>
                 </div>
                 <h3 className="mt-5 text-base font-semibold">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-muted">{description}</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
               </div>
 
               {i < STEPS.length - 1 && (
-                <ArrowRight className="absolute top-1/2 -right-3 z-10 hidden h-5 w-5 -translate-y-1/2 text-muted/40 md:block" />
+                <ArrowRight className="absolute top-1/2 -right-3 z-10 hidden h-5 w-5 -translate-y-1/2 text-muted-foreground/40 md:block" />
               )}
             </div>
           ))}
