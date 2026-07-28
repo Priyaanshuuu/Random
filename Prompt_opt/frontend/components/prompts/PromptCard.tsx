@@ -40,7 +40,7 @@ export function PromptCard({
         "group flex flex-col rounded-xl border bg-card p-5 transition-all duration-200",
         "hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5",
         prompt.isActive
-          ? "border-accent/40 bg-accent/[0.03]"
+          ? "border-accent/40 bg-accent/3"
           : "border-border hover:border-primary/30",
         isJustCreated && "animate-fade-up ring-2 ring-primary/40",
       )}
@@ -68,7 +68,7 @@ export function PromptCard({
         />
       </header>
 
-      <p className="mt-3 line-clamp-4 min-h-[5.5rem] flex-1 text-sm leading-relaxed text-foreground/80">
+      <p className="mt-3 line-clamp-4 min-h-22 flex-1 text-sm leading-relaxed text-foreground/80">
         {prompt.prompt}
       </p>
 

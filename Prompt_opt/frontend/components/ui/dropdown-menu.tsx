@@ -23,7 +23,7 @@ function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          "z-50 min-w-[10rem] overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-xl",
+          "z-50 min-w-40 overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-xl",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
           "data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
@@ -50,7 +50,7 @@ function DropdownMenuItem({
       className={cn(
         "relative flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none transition-colors select-none",
         "focus:bg-surface-2 focus:text-foreground",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "data-disabled:pointer-events-none data-disabled:opacity-50",
         "data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10",
         "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
         inset && "pl-8",
@@ -71,7 +71,7 @@ function DropdownMenuCheckboxItem({
     <DropdownMenuPrimitive.CheckboxItem
       checked={checked}
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-md py-1.5 pr-2 pl-8 text-sm outline-none transition-colors select-none focus:bg-surface-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex cursor-pointer items-center gap-2 rounded-md py-1.5 pr-2 pl-8 text-sm outline-none transition-colors select-none focus:bg-surface-2 data-disabled:pointer-events-none data-disabled:opacity-50",
         className,
       )}
       {...props}
@@ -143,7 +143,7 @@ function DropdownMenuSubContent({
   return (
     <DropdownMenuPrimitive.SubContent
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-xl",
+        "z-50 min-w-32 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-xl",
         className,
       )}
       {...props}

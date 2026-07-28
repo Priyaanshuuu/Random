@@ -87,7 +87,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(
               onKeyDown={handleKeyDown}
               placeholder={`Message ${APP_NAME}…`}
               aria-label="Message"
-              className="max-h-[200px] flex-1 resize-none bg-transparent py-2 text-[15px] leading-6 text-foreground outline-none placeholder:text-muted-foreground/70"
+              className="max-h-50 flex-1 resize-none bg-transparent py-2 text-[15px] leading-6 text-foreground outline-none placeholder:text-muted-foreground/70"
             />
 
             {isLoading ? (

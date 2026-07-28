@@ -39,7 +39,7 @@ export function QuickLinkCard({
             : "bg-accent/10 text-accent",
         )}
       >
-        <Icon className="size-[18px]" />
+        <Icon className="size-4.5" />
       </div>
 
       <div className="space-y-0.5">
