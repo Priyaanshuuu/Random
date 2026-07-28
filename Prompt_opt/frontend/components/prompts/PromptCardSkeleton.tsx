@@ -8,7 +8,7 @@ export function PromptCardSkeleton() {
         <Skeleton className="h-5 w-12 rounded-full" />
         <Skeleton className="size-8 rounded-lg" />
       </div>
-      <div className="mt-3 min-h-[5.5rem] flex-1 space-y-2">
+      <div className="mt-3 min-h-22 flex-1 space-y-2">
         <Skeleton className="h-3.5 w-full" />
         <Skeleton className="h-3.5 w-11/12" />
         <Skeleton className="h-3.5 w-4/6" />
