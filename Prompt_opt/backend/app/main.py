@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers.health import router as health_router
-from Prompt_opt.backend.app.schemas.optimize import router as optimize_router
-from Prompt_opt.backend.app.schemas.evaluate import router as evaluate_router 
+from app.routers.optimize import router as optimize_router
+from app.routers.evaluate import router as evaluate_router
 
 app = FastAPI(title="AI Engine")
 
