@@ -3,12 +3,27 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+/**
+ * The CLI connects over plain TCP, and its connector rejects Neon's
+ * `channel_binding=require` parameter with a misleading "can't reach database
+ * server" (P1001). The app itself is unaffected — it talks to Neon over HTTP via
+ * `@prisma/adapter-neon` — so the parameter is stripped here rather than removed
+ * from `DATABASE_URL`.
+ */
+function cliConnectionString(url: string | undefined): string | undefined {
+  if (!url) return url;
+
+  const parsed = new URL(url);
+  parsed.searchParams.delete("channel_binding");
+  return parsed.toString();
+}
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: cliConnectionString(process.env["DATABASE_URL"]),
   },
 });
