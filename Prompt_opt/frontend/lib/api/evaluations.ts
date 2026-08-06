@@ -1,10 +1,10 @@
 import type { Evaluation } from "@/lib/types";
 import { apiFetch } from "./client";
 
-/** Scores a persisted conversation and stores the result. */
-export function evaluateConversation(conversationId: string) {
+/** Scores a persisted assistant message and stores the result. */
+export function evaluateMessage(messageId: string) {
   return apiFetch<Evaluation>("/api/evaluate", {
     method: "POST",
-    body: { conversationId },
+    body: { messageId },
   });
 }

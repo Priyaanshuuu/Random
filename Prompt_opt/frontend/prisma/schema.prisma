@@ -26,7 +26,6 @@ model Conversation {
   promptVersion   PromptVersion @relation(fields: [promptVersionId], references: [id])
 
   messages    Message[]
-  evaluation  Evaluation?
 }
 
 model Message {
@@ -37,12 +36,18 @@ model Message {
 
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  evaluation Evaluation?
+
+  @@index([conversationId, createdAt])
 }
 
+/// Scores a single assistant answer. Keyed to the message rather than the
+/// conversation so every turn in a thread can be judged independently.
 model Evaluation {
-  id             String   @id @default(cuid())
-  conversationId String   @unique
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  messageId String  @unique
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   score          Int
   feedback       String

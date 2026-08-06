@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { groq } from "@/lib/groq";
+import { ACTIVE_MODEL } from "@/lib/constants";
 
 export async function optimizePrompt(promptId: string) {
   const prompt = await prisma.promptVersion.findUnique({
@@ -24,7 +25,7 @@ export async function optimizePrompt(promptId: string) {
     .join("\n\n");
 
   const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
+    model: ACTIVE_MODEL.id,
     messages: [
       {
         role: "system",

@@ -46,9 +46,11 @@ export function ChatContainer({
         ) : (
           <div className="pb-6">
             {messages.map((message) => {
-              const conversationId = message.conversationId;
-              const evaluation = conversationId
-                ? results[conversationId]
+              const messageId = message.messageId;
+              // A freshly computed verdict wins over the one loaded with the
+              // thread, so re-evaluating updates the card in place.
+              const evaluation = messageId
+                ? (results[messageId] ?? message.evaluation)
                 : undefined;
 
               return (
@@ -57,15 +59,15 @@ export function ChatContainer({
                     message={message}
                     onRetry={onRetry}
                     actions={
-                      conversationId && !evaluation ? (
+                      messageId && !evaluation ? (
                         <Button
                           variant="ghost"
                           size="sm"
                           className="text-muted-foreground hover:text-foreground"
-                          loading={pendingId === conversationId}
-                          onClick={() => void evaluate(conversationId)}
+                          loading={pendingId === messageId}
+                          onClick={() => void evaluate(messageId)}
                         >
-                          {pendingId === conversationId ? null : <Gauge />}
+                          {pendingId === messageId ? null : <Gauge />}
                           Evaluate
                         </Button>
                       ) : null

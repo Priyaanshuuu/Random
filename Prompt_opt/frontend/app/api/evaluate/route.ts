@@ -1,21 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { evaluateConversation } from "../../services/judge.service";
+import { evaluateMessage } from "../../services/judge.service";
 
 export async function POST(req: NextRequest) {
   try {
-    const { conversationId } = await req.json();
+    const { messageId } = await req.json();
 
-    const evaluation = await evaluateConversation(
-      conversationId
-    );
+    if (typeof messageId !== "string" || messageId === "") {
+      return NextResponse.json(
+        { error: "messageId is required" },
+        { status: 400 },
+      );
+    }
 
-    return NextResponse.json(evaluation);
+    return NextResponse.json(await evaluateMessage(messageId));
   } catch (error) {
-    console.log("Evaluate API Error:" , error);
-    
-    return NextResponse.json(
-      { error: "Evaluation failed" },
-      { status: 500 }
-    );
+    console.error("Evaluate API Error:", error);
+
+    // A malformed judge reply is upstream's fault, not the caller's.
+    const reason = error instanceof Error ? error.message : "Evaluation failed";
+    const status = reason.startsWith("Judge ") ? 502 : 500;
+
+    return NextResponse.json({ error: reason }, { status });
   }
 }
