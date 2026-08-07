@@ -1,54 +1,39 @@
-import json
+"""Answer grading, backed by the DSPy `AnswerJudge` module."""
 
-from app.core.config import GROQ_MODEL
-from app.core.groq import client
+import logging
 
-JUDGE_SYSTEM_PROMPT = """You are an AI judge.
+from app.core.errors import InferenceError, InvalidVerdictError
+from app.dspy.modules import AnswerJudge
 
-Score how well the answer responds to the question.
+logger = logging.getLogger(__name__)
 
-Return ONLY a JSON object of the form:
-{"score": <integer 0-100>, "feedback": "<one or two sentences>"}"""
+_judge = AnswerJudge()
 
 
 def judge(question: str, answer: str) -> dict:
-    completion = client.chat.completions.create(
-        model=GROQ_MODEL,
-        # Guarantees parseable JSON instead of prose wrapped in a markdown fence.
-        response_format={"type": "json_object"},
-        messages=[
-            {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": f"Question:\n{question}\n\nAnswer:\n{answer}",
-            },
-        ],
-    )
+    """Scores `answer` against `question`.
 
-    return _parse_verdict(completion.choices[0].message.content)
+    The signature declares `score` as an int, so DSPy parses and coerces it —
+    there is no JSON to unpack here. It cannot enforce the 0-100 range, though,
+    so that is still checked below.
 
-
-def _parse_verdict(content: str | None) -> dict:
-    """Coerces the model's reply into a score/feedback pair.
-
-    JSON mode makes malformed output unlikely but not impossible, and the model
-    can still return a score outside the documented range.
+    Raises:
+        InferenceError: the model was unreachable.
+        InvalidVerdictError: the reply had no usable score or feedback.
     """
     try:
-        data = json.loads(content or "")
-    except json.JSONDecodeError as exc:
-        raise ValueError("Judge did not return valid JSON") from exc
-
-    if not isinstance(data, dict):
-        raise ValueError("Judge did not return a JSON object")
+        prediction = _judge(question=question, answer=answer)
+    except Exception as exc:
+        logger.exception("Answer evaluation failed")
+        raise InferenceError("Could not evaluate the answer") from exc
 
     try:
-        score = int(data["score"])
-    except (KeyError, TypeError, ValueError) as exc:
-        raise ValueError("Judge response is missing a numeric score") from exc
+        score = int(prediction.score)
+    except (TypeError, ValueError) as exc:
+        raise InvalidVerdictError("Judge returned a non-numeric score") from exc
 
-    feedback = data.get("feedback")
-    if not isinstance(feedback, str) or not feedback.strip():
-        raise ValueError("Judge response is missing feedback")
+    feedback = (prediction.feedback or "").strip()
+    if not feedback:
+        raise InvalidVerdictError("Judge returned no feedback")
 
-    return {"score": max(0, min(100, score)), "feedback": feedback.strip()}
+    return {"score": max(0, min(100, score)), "feedback": feedback}

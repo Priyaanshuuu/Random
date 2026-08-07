@@ -1,23 +1,33 @@
-from app.core.config import GROQ_MODEL
-from app.core.groq import client
+"""Prompt optimization, backed by the DSPy `PromptOptimizer` module."""
+
+import logging
+
+from app.core.errors import InferenceError
+from app.dspy.modules import PromptOptimizer
+
+logger = logging.getLogger(__name__)
+
+# Modules are stateless once constructed, so one instance is shared rather than
+# rebuilt per request.
+_optimizer = PromptOptimizer()
 
 
 def optimize_prompt(prompt: str, feedback: str) -> str:
-    completion = client.chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You improve system prompts. "
-                    "Return ONLY the improved prompt, with no preamble or commentary."
-                ),
-            },
-            {
-                "role": "user",
-                "content": f"Current prompt:\n{prompt}\n\nFeedback:\n{feedback}",
-            },
-        ],
-    )
+    """Rewrites `prompt` so it addresses `feedback`.
 
-    return completion.choices[0].message.content or prompt
+    Raises:
+        InferenceError: the model was unreachable or returned an empty prompt.
+    """
+    try:
+        prediction = _optimizer(prompt=prompt, feedback=feedback)
+    except Exception as exc:
+        logger.exception("Prompt optimization failed")
+        raise InferenceError("Could not optimize the prompt") from exc
+
+    improved = (prediction.improved_prompt or "").strip()
+
+    # An empty rewrite would silently wipe the caller's prompt.
+    if not improved:
+        raise InferenceError("Optimizer returned an empty prompt")
+
+    return improved
